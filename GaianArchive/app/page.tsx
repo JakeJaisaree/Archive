@@ -168,31 +168,31 @@ export default function Page() {
     return JSON.stringify(data, null, 2);
   }
 
-  async function callOpenAI(userQuestion: string) {
-    if (!apiKey) { alert("Enter your OpenAI API key."); return; }
-    if (!VECTOR_STORE_ID) { push("System", "No KB set. Add your Vector Store ID in code."); return; }
-  
-  fetch("https://api.openai.com/v1/responses", {
-   method: "POST",
-   headers: {
-     "Content-Type": "application/json",
-     "Authorization": `Bearer ${apiKey}`,
-     "OpenAI-Beta": "assistants=v2" // <- required in many stacks for tool_resources
-  },
+ async function callOpenAI(userQuestion: string) {
+  if (!apiKey) { alert("Enter your OpenAI API key."); return; }
+  if (!VECTOR_STORE_ID) { push("System", "No KB set. Add your Vector Store ID in code."); return; }
+
+  const res = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+      "OpenAI-Beta": "assistants=v2"
+    },
     body: JSON.stringify({
-      model: "gpt-4.1",                      // tools-capable; you can try "gpt-4o-mini" too
+      model: "gpt-4.1",
       temperature: 0,
-      input: userQuestion,                   // keep plain string
-      tools: [{ type: "file_search" }],      // declare the tool
+      input: userQuestion,
+      tools: [{ type: "file_search" }],
       tool_resources: {
         file_search: {
-          vector_store_ids: ["vs_68b3f5ab5f9c8191b6b7819a4deecdef"] // <-- your VS id
-      }
-    },
-    tool_choice: { type: "file_search" }   // force using the KB
-  })
-})
-.then(async (res) => {
+          vector_store_ids: [VECTOR_STORE_ID]
+        }
+      },
+      tool_choice: { type: "file_search" }
+    })
+  });
+
   const data = await res.json();
   if (!res.ok) throw new Error(data?.error?.message || res.statusText);
 
@@ -200,17 +200,17 @@ export default function Page() {
     (typeof data.output_text === "string" && data.output_text.trim()) ||
     (Array.isArray(data.output) &&
       data.output
-        .flatMap(m => Array.isArray(m?.content) ? m.content : [])
-        .map(p => p?.text || p?.output_text || p?.input_text)
+        .flatMap((m: any) => (Array.isArray(m?.content) ? m.content : []))
+        .map((p: any) => p?.text || p?.output_text || p?.input_text)
         .filter(Boolean)
         .join("")
         .trim()) ||
-    JSON.stringify(data);
+    "";
 
-  addMessage("GPT", answer || "Not in the archive yet.");
-})
-   
-.catch(err => addMessage("GPT", `Error: ${err.message}`));
+  return answer || "Not in the archive yet.";
+}
+
+ .catch(err => addMessage("GPT", Error: ${err.message}));
  
 
   async function onSend() {
@@ -316,5 +316,4 @@ export default function Page() {
       </main>
     </div>
   );
-}
 
