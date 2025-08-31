@@ -1,40 +1,35 @@
-// app/api/checkout/route.ts
 import Stripe from "stripe";
+import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic"; // ensure no prerendering
+export const dynamic = "force-dynamic";
 
-// Use account default API version (safest); remove apiVersion pin to avoid mismatches.
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const secret = process.env.STRIPE_SECRET_KEY;
+const stripe = new Stripe(secret!, {});
 
 type CheckoutBody = {
   priceId?: string;
   successPath?: string; // e.g. "/account"
   cancelPath?: string;  // e.g. "/pricing"
-  customerId?: string;  // optional: if you already have a Stripe customer
+  customerId?: string;  // optional
 };
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json().catch(() => ({}))) as CheckoutBody;
-
-    const priceId =
-      typeof body.priceId === "string"
-        ? body.priceId
-        : process.env.STRIPE_PRICE_ID_PRO;
-
-    if (!process.env.STRIPE_SECRET_KEY) {
-      return new Response("Missing STRIPE_SECRET_KEY", { status: 500 });
+    if (!secret) {
+      return NextResponse.json({ error: "Missing STRIPE_SECRET_KEY" }, { status: 500 });
     }
+
+    const body = (await req.json().catch(() => ({}))) as CheckoutBody;
+    const priceId = body.priceId;
+    const successPath = body.successPath ?? "/account";
+    const cancelPath = body.cancelPath ?? "/pricing";
+
     if (!priceId) {
-      return new Response("Missing priceId (or STRIPE_PRICE_ID_PRO)", {
-        status: 400,
-      });
+      return NextResponse.json({ error: "Missing priceId" }, { status: 400 });
     }
 
     const origin = process.env.DOMAIN_URL || new URL(req.url).origin;
-    const successPath = body.successPath ?? "/account";
-    const cancelPath = body.cancelPath ?? "/pricing";
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -46,9 +41,9 @@ export async function POST(req: Request) {
       cancel_url: `${origin}${cancelPath}`,
     });
 
-    return Response.json({ url: session.url }, { status: 200 });
+    return NextResponse.json({ url: session.url }, { status: 200 });
   } catch (err: any) {
     console.error("Checkout error:", err);
-    return new Response(err?.message ?? "Checkout failed", { status: 500 });
+    return NextResponse.json({ error: err?.message ?? "Checkout failed" }, { status: 500 });
   }
 }
