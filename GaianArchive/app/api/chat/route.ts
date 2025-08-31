@@ -60,6 +60,8 @@ const ai = await openai.responses.create({
   },
 });
 
+const ai = await openai.responses.create(body as any);
+
     const text = extractText(ai) || 'Not in the archive yet.';
     return NextResponse.json({ response: text });
   } catch (err: any) {
@@ -70,6 +72,7 @@ const ai = await openai.responses.create({
     );
   }
 }
+
 
 
 
