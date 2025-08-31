@@ -146,29 +146,21 @@ export default function Page() {
     return "";
   }
 
-  async function callOpenAI(userQuestion: string) {
-    if (!apiKey) { alert("Enter your OpenAI API key."); return; }
-    if (!VECTOR_STORE_ID) { push("System", "No KB set. Add your Vector Store ID in code."); return; }
+async function callOpenAI(userQuestion: string) {
+  if (!apiKey) { alert("Enter your OpenAI API key."); return; }
 
-    const res = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-        "OpenAI-Beta": "assistants=v2" // keep for browser calls
-      },
-      body: JSON.stringify({
-        model: "gpt-4.1",
-        temperature: 0,
-        input: userQuestion,
-        tools: [{ type: "file_search" }],
-        tool_resources: { file_search: { vector_store_ids: [VECTOR_STORE_ID] } },
-        tool_choice: { type: "file_search" }
-      })
-    });
+  const res = await fetch("/api/respond", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      apiKey,
+      input: userQuestion,
+      vectorStoreId: "vs_68b3f5ab5f9c8191b6b7819a4deecdef"
+    })
+  });
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data?.error?.message || res.statusText);
+  if (!res.ok) throw new Error(data?.error || res.statusText);
 
   const answer =
     (typeof data.output_text === "string" && data.output_text.trim()) ||
@@ -182,8 +174,7 @@ export default function Page() {
     "";
 
   return answer || "Not in the archive yet.";
-} // <-- end of callOpenAI (no .catch here)
-
+}
 
   async function onSend() {
     const q = input.trim();
