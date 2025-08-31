@@ -42,8 +42,7 @@ const files = await listAllVectorFiles(vsId, 1000);
       bytes: (f as any).bytes,
       created_at: (f as any).created_at,
       status: (f as any).status,
-    })),
-  };
+    }))
 }
 
 /**
@@ -141,5 +140,6 @@ export async function readKB(): Promise<Record<string, unknown>> {
     files: info.files,
   };
 }
+
 
 
