@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     }
 
     const ai = await openai.responses.create({
-      model: "o4-mini",
+      model: "gpt-4.1",
       temperature: 0,
       input: String(message),
       tools: [{ type: "file_search" }] as any, // cast keeps TS quiet across SDK versions
@@ -50,6 +50,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "AI error", detail: String(err?.message || err) }, { status: 500 });
   }
 }
+
 
 
 
