@@ -3,7 +3,6 @@ import OpenAI from "openai";
 import { env } from "@/lib/env";
 
 export const runtime = "nodejs";
-
 const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
 
 function extractText(data: any): string {
@@ -38,7 +37,7 @@ export async function POST(req: Request) {
       model: "gpt-4.1",
       temperature: 0,
       input: String(message),
-      tools: [{ type: "file_search" }] as any, // cast keeps TS quiet across SDK versions
+      tools: [{ type: "file_search" }] as any,
       tool_resources: { file_search: { vector_store_ids: [env.VECTOR_STORE_ID] } } as any,
       tool_choice: { type: "file_search" } as any,
     } as any);
@@ -50,6 +49,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "AI error", detail: String(err?.message || err) }, { status: 500 });
   }
 }
+
 
 
 
