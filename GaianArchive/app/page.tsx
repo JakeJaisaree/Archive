@@ -167,22 +167,23 @@ export default function Page() {
       })
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error?.message || res.statusText);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.message || res.statusText);
 
-    const answer =
-      (typeof data.output_text === "string" && data.output_text.trim()) ||
-      (Array.isArray(data.output) &&
-        data.output
-          .flatMap((m: any) => (Array.isArray(m?.content) ? m.content : []))
-          .map((p: any) => p?.text || p?.output_text || p?.input_text)
-          .filter(Boolean)
-          .join("")
-          .trim()) ||
-      "";
+  const answer =
+    (typeof data.output_text === "string" && data.output_text.trim()) ||
+    (Array.isArray(data.output) &&
+      data.output
+        .flatMap((m: any) => (Array.isArray(m?.content) ? m.content : []))
+        .map((p: any) => p?.text || p?.output_text || p?.input_text)
+        .filter(Boolean)
+        .join("")
+        .trim()) ||
+    "";
 
-    return answer || "Not in the archive yet.";
-  }
+  return answer || "Not in the archive yet.";
+} // <-- end of callOpenAI (no .catch here)
+
 
   async function onSend() {
     const q = input.trim();
