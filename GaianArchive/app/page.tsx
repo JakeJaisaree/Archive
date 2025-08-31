@@ -58,7 +58,7 @@ class UniversalSystemsOptimizerCalculus {
   }
 }
 
-export default function Page() 
+export default function Page();
   // ===== UI state =====
   const [messages, setMessages] = useState<Msg[]>([]);
   const [apiKey, setApiKey] = useState("");
