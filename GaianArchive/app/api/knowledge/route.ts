@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { readKB } from "@/lib/kb";
+import { readKBInfo, readKBPreview } from "@/lib/kb";
 
 export const runtime = "nodejs";
 
 export async function GET() {
-  const kb = await readKB();
-  return NextResponse.json({ count: Object.keys(kb).length, data: kb });
+  const info = await readKBInfo();
+  const preview = await readKBPreview().catch(() => "");
+  return NextResponse.json({ info, preview });
 }
