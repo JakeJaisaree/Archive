@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 type Msg = { role: "User" | "GPT" | "System"; text: string };
 
-const PREFERRED_MODELS = ["gpt-5-mini"]; // adjust if needed
+const PREFERRED_MODELS = ["gpt-4.1"]; // adjust if needed
 const VECTOR_STORE_ID = "vs_68b36b153bfc819188d7aafca6a1e702"; // <-- paste your real vector store ID
 
 // ===== Minimal USOC class (from your HTML), unchanged behavior =====
@@ -168,30 +168,28 @@ export default function Page() {
     return JSON.stringify(data, null, 2);
   }
 
-  async function callOpenAI(userQuestion: string) {
+async function callOpenAI(userQuestion: string) {
   if (!apiKey) { alert("Enter your OpenAI API key."); return; }
   if (!VECTOR_STORE_ID) { push("System", "No KB set. Add your Vector Store ID in code."); return; }
 
   const body = {
-    model: "gpt-5-mini",
+    model: "gpt-4.1",
     temperature: 0,
-    // instructions: 'optional system prompt here',  // ← if you want one, use *instructions*
-    input: userQuestion,                             // plain string input
-    tools: [{ type: "file_search" }],
+    input: userQuestion,                     // plain string
+    tools: [{ type: "file_search" }],        // built-in tool
     tool_resources: {
-      file_search: {
-        vector_store_ids: [VECTOR_STORE_ID],         // ← belongs here, not inside tools[]
-      },
+      file_search: { vector_store_ids: [VECTOR_STORE_ID] },
     },
-    tool_choice: { type: "file_search" },            // ← force using the KB
+    tool_choice: { type: "file_search" },    // require KB usage
+    // max_output_tokens: 500,
   };
 
   const res = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
-    headers: { 
-      "Content-Type": "application/json", 
+    headers: {
+      "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`,
-      "OpenAI-Beta": "assistants=v2"    
+      // ❌ no beta header needed in 2025
     },
     body: JSON.stringify(body),
   });
