@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "VECTOR_STORE_ID not set" }, { status: 500 });
     }
 
-    const ai = await openai.responses.create(
+const ai = await openai.responses.create(
   {
     model: "gpt-4.1",
     temperature: 0,
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     headers: { "OpenAI-Beta": "assistants=v2" }, // ✅ add this
   }
 );
-
+    
     const text = extractText(ai) || "Not in the archive yet.";
     return NextResponse.json({ response: text });
   } catch (err: any) {
@@ -54,6 +54,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "AI error", detail: String(err?.message || err) }, { status: 500 });
   }
 }
+
 
 
 
