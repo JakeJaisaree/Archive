@@ -123,7 +123,7 @@ app.post("/api/chat", async (req, res) => {
 });
 
 // Stripe Checkout
-app.post("/api/create-checkout-session", async (req, res) => {
+app.post("/api/checkout", async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
