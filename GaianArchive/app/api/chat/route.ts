@@ -1,4 +1,3 @@
-// app/api/chat/route.ts
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { env } from "@/lib/env";
@@ -24,7 +23,7 @@ function extractText(data: any): string {
     if (out.length) return out.join("").trim();
   }
 
-  // Fallback (just in case)
+  // Fallback (legacy-safe)
   const c = data?.choices?.[0]?.message?.content;
   return typeof c === "string" ? c.trim() : "";
 }
@@ -39,22 +38,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "VECTOR_STORE_ID not set" }, { status: 500 });
     }
 
-    // Use Responses API with File Search; force using your Vector Store
-    const body = {
-      model: "gpt-5",              // tools-capable model
+    // Responses API with File Search (no Assistants header)
+    const ai = await openai.responses.create({
+      model: env.OPENAI_MODEL || "gpt-4o-mini",
       temperature: 0,
       input: String(message),
-      tools: [{ type: "file_search" }], // declare the tool
+      tools: [{ type: "file_search" }],
       tool_resources: {
-        file_search: { vector_store_ids: [env.VECTOR_STORE_ID] }, // point to your store
+        file_search: { vector_store_ids: [env.VECTOR_STORE_ID] },
       },
-      tool_choice: { type: "file_search" }, // require KB usage
-    };
-
-    // With openai@4.55.0 some stacks still need the beta header; include it.
-    const ai = await openai.responses.create(body as any, {
-      headers: { "OpenAI-Beta": "assistants=v2" },
-    } as any);
+      // Optional: keep if you want to strongly bias retrieval usage.
+      // If you see tool invocation issues, you can remove tool_choice.
+      tool_choice: { type: "file_search" },
+    });
 
     const text = extractText(ai) || "Not in the archive yet.";
     return NextResponse.json({ response: text });
