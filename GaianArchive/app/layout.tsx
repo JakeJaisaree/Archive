@@ -1,6 +1,4 @@
-export const metadata = {
-  title: "Gaian Archive",
-};
+import "./globals.css";
 
 export default function RootLayout({
   children,
