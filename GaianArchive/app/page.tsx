@@ -169,38 +169,33 @@ export default function Page() {
   }
 
   async function callOpenAI(userQuestion: string) {
-    if (!apiKey) {
-      alert("Enter your OpenAI API key.");
-      return;
-    }
-    if (!VECTOR_STORE_ID) {
-      push("System", "No KB set. Add your Vector Store ID in code.");
-      return;
-    }
-    const tools = [{ type: "file_search", vector_store_ids: [VECTOR_STORE_ID] }];
-    const system_instruction =
-      'Only answer using the provided vector store (KB). If the KB does not contain the needed support, reply exactly: "Not in the archive yet." Do NOT use outside knowledge.';
+  if (!apiKey) { alert("Enter your OpenAI API key."); return; }
+  if (!VECTOR_STORE_ID) { push("System", "No KB set. Add your Vector Store ID in code."); return; }
 
-    for (const model of PREFERRED_MODELS) {
-      try {
-        const body = { model, input: userQuestion, system_instruction, tools };
-        const res = await fetch("https://api.openai.com/v1/responses", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`
-          },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.error?.message || res.statusText);
-        return extractAnswer(data);
-      } catch (err) {
-        // try next model if present
-        if (model === PREFERRED_MODELS[PREFERRED_MODELS.length - 1]) throw err;
-      }
-    }
-  }
+  const body = {
+    model: "gpt-5-mini",
+    temperature: 0,
+    // instructions: 'optional system prompt here',  // ← if you want one, use *instructions*
+    input: userQuestion,                             // plain string input
+    tools: [{ type: "file_search" }],
+    tool_resources: {
+      file_search: {
+        vector_store_ids: [VECTOR_STORE_ID],         // ← belongs here, not inside tools[]
+      },
+    },
+    tool_choice: { type: "file_search" },            // ← force using the KB
+  };
+
+  const res = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.message || res.statusText);
+  return extractAnswer(data);
+}
 
   async function onSend() {
     const q = input.trim();
