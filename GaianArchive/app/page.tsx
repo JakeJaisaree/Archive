@@ -175,13 +175,10 @@ async function callOpenAI(userQuestion: string) {
   const body = {
     model: "gpt-4.1",
     temperature: 0,
-    input: userQuestion,                     // plain string
-    tools: [{ type: "file_search" }],        // built-in tool
-    tool_resources: {
-      file_search: { vector_store_ids: [VECTOR_STORE_ID] },
-    },
-    tool_choice: { type: "file_search" },    // require KB usage
-    // max_output_tokens: 500,
+    input: userQuestion,
+    tools: [{ type: "file_search" as const }],
+    tool_resources: { file_search: { vector_store_ids: [VECTOR_STORE_ID] } },
+    tool_choice: { type: "file_search" as const }, // force KB usage
   };
 
   const res = await fetch("https://api.openai.com/v1/responses", {
@@ -189,7 +186,6 @@ async function callOpenAI(userQuestion: string) {
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`,
-      // ❌ no beta header needed in 2025
     },
     body: JSON.stringify(body),
   });
