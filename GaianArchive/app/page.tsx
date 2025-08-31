@@ -6,7 +6,7 @@ import "./globals.css";
 type Msg = { role: "User" | "GPT" | "System"; text: string };
 
 const PREFERRED_MODELS = ["gpt-5-mini"]; // adjust if needed
-const VECTOR_STORE_ID = "vs_XXXXXXXXXXXX"; // <-- paste your real vector store ID
+const VECTOR_STORE_ID = "vs_68b36b153bfc819188d7aafca6a1e702"; // <-- paste your real vector store ID
 
 // ===== Minimal USOC class (from your HTML), unchanged behavior =====
 class UniversalSystemsOptimizerCalculus {
