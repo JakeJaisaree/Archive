@@ -122,36 +122,8 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-// Stripe Checkout
-app.post("/api/checkout", async (req, res) => {
-  try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      mode: "subscription",
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            recurring: { interval: "month" },
-            product_data: { name: "Gaian Archive Subscription" },
-            unit_amount: 1000
-          },
-          quantity: 1
-        }
-      ],
-      success_url: `${DOMAIN_URL}/success.html`,
-      cancel_url: `${DOMAIN_URL}/cancel.html`
-    });
-    res.json({ url: session.url });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Stripe error", detail: String(e?.message || e) });
-  }
-});
-
-// Fallback to index.html for root
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/index.html"));
+  res.sendFile(path.join(__dirname, "../public/page.tsx"));
 });
 
 app.listen(PORT, () => {
