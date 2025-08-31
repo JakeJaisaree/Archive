@@ -33,14 +33,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "VECTOR_STORE_ID not set" }, { status: 500 });
     }
 
-    const ai = await openai.responses.create({
-      model: "gpt-4.1",
-      temperature: 0,
-      input: String(message),
-      tools: [{ type: "file_search" }] as any,                          // soften types
-      tool_resources: { file_search: { vector_store_ids: [env.VECTOR_STORE_ID] } } as any,
-      tool_choice: { type: "file_search" } as any,
-    } as any /* some 4.x typings lag on these fields */);
+    const ai = await openai.responses.create(
+  {
+    model: "gpt-4.1",
+    temperature: 0,
+    input: String(message),
+    tools: [{ type: "file_search" }] as any,
+    tool_resources: { file_search: { vector_store_ids: [env.VECTOR_STORE_ID] } } as any,
+    tool_choice: { type: "file_search" } as any,
+  } as any,
+  {
+    headers: { "OpenAI-Beta": "assistants=v2" }, // ✅ add this
+  }
+);
 
     const text = extractText(ai) || "Not in the archive yet.";
     return NextResponse.json({ response: text });
@@ -49,6 +54,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "AI error", detail: String(err?.message || err) }, { status: 500 });
   }
 }
+
 
 
 
