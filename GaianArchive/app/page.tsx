@@ -186,6 +186,7 @@ async function callOpenAI(userQuestion: string) {
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`,
+      "OpenAI-Beta": "assistants=v2", 
       // If you STILL see "Unknown parameter: tool_resources", add:
       // "OpenAI-Beta": "assistants=v2"
     },
