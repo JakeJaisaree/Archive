@@ -1,3 +1,4 @@
+<style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { height:100%; }
 body {
@@ -107,3 +108,4 @@ button:hover { filter:brightness(1.05); }
   #composer textarea { height:140px; min-height:140px; }
   #composer button { width:100%; }
 }
+<style>
