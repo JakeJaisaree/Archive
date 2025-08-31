@@ -170,7 +170,7 @@ export default function Page() {
 
   async function callOpenAI(userQuestion: string) {
     if (!apiKey) { alert("Enter your OpenAI API key."); return; }
-    if (!VECTOR_STORE_ID) { push("System", "No KB set. Add your Vector Store ID in code."); return;
+    if (!VECTOR_STORE_ID) { push("System", "No KB set. Add your Vector Store ID in code."); return; }
   
   fetch("https://api.openai.com/v1/responses", {
    method: "POST",
@@ -316,4 +316,5 @@ export default function Page() {
       </main>
     </div>
   );
+}
 
