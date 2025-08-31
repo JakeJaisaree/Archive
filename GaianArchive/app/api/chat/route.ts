@@ -52,30 +52,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "VECTOR_STORE_ID not set" }, { status: 500 });
     }
 
-  const body = {
-    model: "gpt-5-mini",
-    temperature: 0,
-    input: userQuestion,                       
-    tools: [{ type: "file_search" }],
-    tool_resources: {
-      file_search: {
-        vector_store_ids: [VECTOR_STORE_ID],    
-      },
-    },
-    tool_choice: { type: "file_search" },           
-  };
+    // Force the model to use the KB tool; no instructions at all.
+    const ai = await openai.responses.create({
+      model: "gpt-5-mini",
+      temperature: 0,
+      input: String(message),
+      tools: [{ type: "file_search" }] as any,
+      tool_resources: { file_search: { vector_store_ids: [env.VECTOR_STORE_ID] } } as any,
+      tool_choice: { type: "file_search" } as any, // require file_search
+      // max_output_tokens: 500,
+    } as any);
 
-  const res = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify(body),
-  });
+    const text = extractText(ai);
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error?.message || res.statusText);
-  return extractAnswer(data);
+    // If we didn’t see any KB signals or we got nothing back, return your fallback.
+    if (!text || !usedKB(ai)) {
+      return NextResponse.json({ response: "Not in the archive yet." });
+    }
+
+    return NextResponse.json({ response: text });
+  } catch (err: any) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "AI error", detail: String(err?.message || err) },
+      { status: 500 }
+    );
+  }
 }
-
-
-
 
