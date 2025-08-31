@@ -40,7 +40,6 @@ export async function POST(req: Request) {
     // Cast to any to avoid TS mismatch across SDK versions
     const ai = await openai.responses.create({
       model: "gpt-5-mini",
-      temperature: 0.2,
       instructions,
       input: String(message),
       tools: [{ type: "file_search" }] as any,
@@ -59,6 +58,7 @@ export async function POST(req: Request) {
     );
   }
 }
+
 
 
 
