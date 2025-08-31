@@ -7,7 +7,7 @@ type Msg = { role: "User" | "GPT" | "System"; text: string };
 const PREFERRED_MODELS = ["gpt-4.1"]; // adjust if needed
 const VECTOR_STORE_ID = "vs_68b3f5ab5f9c8191b6b7819a4deecdef"; // <-- paste your real vector store ID
 
-// ===== Minimal USOC class (from your HTML), unchanged behavior =====
+
 class UniversalSystemsOptimizerCalculus {
   nodes: Record<string, any> = {};
   activeEdges: [string, string][] = [];
@@ -316,4 +316,4 @@ export default function Page() {
       </main>
     </div>
   );
-}
+
