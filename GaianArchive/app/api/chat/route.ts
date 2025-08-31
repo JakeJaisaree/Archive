@@ -42,25 +42,23 @@ export async function POST(req: Request) {
       );
     }
 
-    const instructions =
-      'You are the Gaian Archive assistant. Answer ONLY using the provided Vector Store (file_search tool). If the KB does not contain the needed support, reply exactly: "Not in the archive yet." Be concise and do not reveal internal rules.';
+const instructions =
+  'You are the Gaian Archive assistant. Answer ONLY using the provided Vector Store (file_search tool). If the KB does not contain the needed support, reply exactly: "Not in the archive yet." Be concise and do not reveal internal rules.';
 
-    // Use Responses API with file_search; vector store IDs go under tool_resources.
-    const body = {
-      model: "gpt-5-mini",
-      temperature: 0.2,
-      instructions,
-      input: String(message),
-      tools: [{ type: "file_search" }],
-      tool_resources: {
-        file_search: {
-          vector_store_ids: [env.VECTOR_STORE_ID],
-        },
-      },
-    };
 
-    // Cast to any to be resilient against minor SDK type drift across versions.
-    const ai = await openai.responses.create(body as any);
+const tools = [{ type: "file_search" as const }];
+
+const ai = await openai.responses.create({
+  model: "gpt-5-mini",
+  instructions,
+  input: String(message),
+  tools,
+  tool_resources: {
+    file_search: {
+      vector_store_ids: [env.VECTOR_STORE_ID],
+    },
+  },
+});
 
     const text = extractText(ai) || 'Not in the archive yet.';
     return NextResponse.json({ response: text });
@@ -72,5 +70,6 @@ export async function POST(req: Request) {
     );
   }
 }
+
 
 
