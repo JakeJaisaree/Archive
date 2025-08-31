@@ -175,10 +175,10 @@ async function callOpenAI(userQuestion: string) {
   const body = {
     model: "gpt-4.1",
     temperature: 0,
-    input: userQuestion,
-    tools: [{ type: "file_search" as const }],
+    input: userQuestion,                               // keep as plain string
+    tools: [{ type: "file_search" as const }],         // literal type avoids widening
     tool_resources: { file_search: { vector_store_ids: [VECTOR_STORE_ID] } },
-    tool_choice: { type: "file_search" as const }, // force KB usage
+    tool_choice: { type: "file_search" as const },     // force KB usage
   };
 
   const res = await fetch("https://api.openai.com/v1/responses", {
@@ -186,6 +186,8 @@ async function callOpenAI(userQuestion: string) {
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`,
+      // If you STILL see "Unknown parameter: tool_resources", add:
+      // "OpenAI-Beta": "assistants=v2"
     },
     body: JSON.stringify(body),
   });
@@ -194,6 +196,7 @@ async function callOpenAI(userQuestion: string) {
   if (!res.ok) throw new Error(data?.error?.message || res.statusText);
   return extractAnswer(data);
 }
+  
 
   async function onSend() {
     const q = input.trim();
