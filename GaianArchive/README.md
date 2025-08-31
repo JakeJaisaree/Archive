@@ -1,4 +1,4 @@
-# Gaian Archive (Aligned)
+# Gaian Archive
 
 A single Node/Express server that serves a static front-end and connects to OpenAI + Stripe.
 Knowledge Base is a server-side JSON file (`backend/knowledgeBase.json`).
