@@ -172,26 +172,24 @@ async function callOpenAI(userQuestion: string) {
   if (!apiKey) { alert("Enter your OpenAI API key."); return; }
   if (!VECTOR_STORE_ID) { push("System", "No KB set. Add your Vector Store ID in code."); return; }
 
-  const body = {
-    model: "gpt-4.1",
-    temperature: 0,
-    input: userQuestion,                               // keep as plain string
-    tools: [{ type: "file_search" as const }],         // literal type avoids widening
-    tool_resources: { file_search: { vector_store_ids: [VECTOR_STORE_ID] } },
-    tool_choice: { type: "file_search" as const },     // force KB usage
-  };
+ const body = {
+  model: "gpt-4.1",
+  temperature: 0,
+  input: userQuestion,
+  tools: [{ type: "file_search" as const }],
+  tool_resources: { file_search: { vector_store_ids: [VECTOR_STORE_ID] } },
+  tool_choice: { type: "file_search" as const },
+};
 
-  const res = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-      "OpenAI-Beta": "assistants=v2", 
-      // If you STILL see "Unknown parameter: tool_resources", add:
-      // "OpenAI-Beta": "assistants=v2"
-    },
-    body: JSON.stringify(body),
-  });
+ const res = await fetch("https://api.openai.com/v1/responses", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${apiKey}`,
+    "OpenAI-Beta": "assistants=v2",          
+  },
+  body: JSON.stringify(body),
+});
 
   const data = await res.json();
   if (!res.ok) throw new Error(data?.error?.message || res.statusText);
