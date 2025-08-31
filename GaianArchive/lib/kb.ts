@@ -22,18 +22,6 @@ function client() {
   return new OpenAI({ apiKey: requireEnv("OPENAI_API_KEY") });
 }
 
-/**
- * Read high-level info + file list from your vector store.
- * This is the "knowledge base" catalog for the UI.
- */
-export async function readKBInfo(): Promise<KBInfo> {
-  const vsId = requireEnv("VECTOR_STORE_ID");
-  const openai = client();
-
-
-const store = await openai.vectorStores.retrieve(vsId);
-  
-  
 const files = await listAllVectorFiles(vsId, 1000);
 
   let latest = 0;
@@ -58,6 +46,17 @@ const files = await listAllVectorFiles(vsId, 1000);
   };
 }
 
+/**
+ * Read high-level info + file list from your vector store.
+ * This is the "knowledge base" catalog for the UI.
+ */
+export async function readKBInfo(): Promise<KBInfo> {
+  const vsId = requireEnv("VECTOR_STORE_ID");
+  const openai = client();
+
+
+const store = await openai.vectorStores.retrieve(vsId);
+  
 /**
  * Download a small text preview from the first few files in the vector store.
  * NOTE: This is only for showing a snippet in your UI; retrieval for answers
@@ -142,4 +141,5 @@ export async function readKB(): Promise<Record<string, unknown>> {
     files: info.files,
   };
 }
+
 
