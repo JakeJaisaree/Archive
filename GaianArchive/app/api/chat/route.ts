@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
     // Responses API with File Search (no Assistants header)
     const ai = await openai.responses.create({
-      model: env.OPENAI_MODEL || "gpt-4o-mini",
+      model: env.OPENAI_MODEL || "gpt-5",
       temperature: 0,
       input: String(message),
       tools: [{ type: "file_search" }],
@@ -62,6 +62,7 @@ export async function POST(req: Request) {
     );
   }
 }
+
 
 
 
