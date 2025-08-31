@@ -188,7 +188,11 @@ export default function Page() {
 
   const res = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    headers: { 
+      "Content-Type": "application/json", 
+      "Authorization": `Bearer ${apiKey}`,
+      "OpenAI-Beta": "assistants=v2"    
+    },
     body: JSON.stringify(body),
   });
 
