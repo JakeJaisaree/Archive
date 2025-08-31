@@ -30,19 +30,16 @@ export async function readKBInfo(): Promise<KBInfo> {
   const vsId = requireEnv("VECTOR_STORE_ID");
   const openai = client();
 
-  // store meta
-  const store = await openai.vectorStores.retrieve(vsId);
 
-  // list up to 200 files (paginate as needed)
-  const filesResp = await openai.vectorStores.files.list(vsId, { limit: 200 });
-  const files = filesResp.data ?? [];
+const store = await openai.vectorStores.retrieve(vsId);
+  
+  
+const files = await listAllVectorFiles(vsId, 1000);
 
-  // find latest created_at
   let latest = 0;
   for (const f of files) {
-    if (typeof (f as any).created_at === "number" && (f as any).created_at > latest) {
-      latest = (f as any).created_at;
-    }
+    const ts = (f as any).created_at;
+    if (typeof ts === "number" && ts > latest) latest = ts;
   }
 
   const counts = (store as any).file_counts ?? {};
@@ -70,7 +67,7 @@ export async function readKBPreview(maxBytes: number = MAX_PREVIEW_BYTES): Promi
   const vsId = requireEnv("VECTOR_STORE_ID");
   const openai = client();
 
-  const filesResp = await openai.vectorStores.files.list(vsId, { limit: 10 });
+  const filesResp = await openai.vectorStores.files.list(vsId, { limit: 10});
   const files = filesResp.data ?? [];
   if (!files.length) return "";
 
@@ -145,3 +142,4 @@ export async function readKB(): Promise<Record<string, unknown>> {
     files: info.files,
   };
 }
+
