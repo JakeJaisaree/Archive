@@ -4,9 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 type Msg = { role: "User" | "GPT" | "System"; text: string };
 
-const PREFERRED_MODELS = ["gpt-4.1"]; // adjust if needed
-const VECTOR_STORE_ID = "vs_68b3f5ab5f9c8191b6b7819a4deecdef"; // <-- paste your real vector store ID
-
+const VECTOR_STORE_ID = "vs_68b3f5ab5f9c8191b6b7819a4deecdef";
 
 class UniversalSystemsOptimizerCalculus {
   nodes: Record<string, any> = {};
@@ -21,9 +19,7 @@ class UniversalSystemsOptimizerCalculus {
   connectNodes(a: string, b: string) {
     if (!this.nodes[a] || !this.nodes[b]) return;
     this.activeEdges.push([a, b]);
-    this.suspendedEdges = this.suspendedEdges.filter(
-      (e) => !(e[0] === a && e[1] === b)
-    );
+    this.suspendedEdges = this.suspendedEdges.filter((e) => !(e[0] === a && e[1] === b));
     this.updateEffects();
   }
   disconnectNodes(a: string, b: string) {
@@ -42,14 +38,8 @@ class UniversalSystemsOptimizerCalculus {
     return n1.quality * n1.energy + n2.quality * n2.energy;
   }
   updateEffects() {
-    this.totalEffect = this.activeEdges.reduce(
-      (s, [a, b]) => s + this.calculatePairEffect(a, b),
-      0
-    );
-    this.freewill = this.suspendedEdges.reduce(
-      (s, [a, b]) => s + this.calculatePairEffect(a, b),
-      0
-    );
+    this.totalEffect = this.activeEdges.reduce((s, [a, b]) => s + this.calculatePairEffect(a, b), 0);
+    this.freewill = this.suspendedEdges.reduce((s, [a, b]) => s + this.calculatePairEffect(a, b), 0);
     this.optimizeObjective();
   }
   optimizeObjective() {
@@ -58,7 +48,7 @@ class UniversalSystemsOptimizerCalculus {
   }
 }
 
-export default function Page();
+export default function Page() {
   // ===== UI state =====
   const [messages, setMessages] = useState<Msg[]>([]);
   const [apiKey, setApiKey] = useState("");
@@ -67,8 +57,8 @@ export default function Page();
   const [input, setInput] = useState("");
   const chatRef = useRef<HTMLDivElement>(null);
 
-  // ===== USOC boot =====
-  const usocRef = useRef<UniversalSystemsOptimizerCalculus>();
+  // USOC boot
+  const usocRef = useRef<UniversalSystemsOptimizerCalculus | null>(null);
   if (!usocRef.current) {
     const u = new UniversalSystemsOptimizerCalculus();
     u.addNode("Hero", "Character", 1, 10);
@@ -76,7 +66,7 @@ export default function Page();
     usocRef.current = u;
   }
 
-  // ===== Hydrate remember/key like your HTML =====
+  // hydrate remember/key
   useEffect(() => {
     const remembered = localStorage.getItem("gaia.rememberKey") === "1";
     setRemember(remembered);
@@ -85,7 +75,7 @@ export default function Page();
       if (saved) setApiKey(saved);
     }
     updateKbBadge();
-    refreshKBStatus().catch(() => {}); // best-effort
+    refreshKBStatus().catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -99,11 +89,7 @@ export default function Page();
   }
 
   function tsToLocal(ts: number) {
-    try {
-      return new Date(ts * 1000).toLocaleString();
-    } catch {
-      return "";
-    }
+    try { return new Date(ts * 1000).toLocaleString(); } catch { return ""; }
   }
 
   async function refreshKBStatus() {
@@ -113,12 +99,12 @@ export default function Page();
     }
     setKbBadgeText("KB: checking…");
     try {
-      const sRes = await fetch(
-        `https://api.openai.com/v1/vector_stores/${VECTOR_STORE_ID}`,
-        { headers: { Authorization: `Bearer ${apiKey}` } }
-      );
+      const sRes = await fetch(`https://api.openai.com/v1/vector_stores/${VECTOR_STORE_ID}`, {
+        headers: { Authorization: `Bearer ${apiKey}` }
+      });
       const store = await sRes.json();
       if (!sRes.ok) throw new Error(store?.error?.message || "Failed to fetch store");
+
       const counts = store.file_counts || {};
       const completed = counts.completed ?? counts.total ?? 0;
 
@@ -133,12 +119,9 @@ export default function Page();
         if (f.created_at && f.created_at > latest) latest = f.created_at;
       });
 
-      setKbBadgeText(
-        `KB: ${completed} files • updated ${latest ? tsToLocal(latest) : "—"}`
-      );
-    } catch (e) {
+      setKbBadgeText(`KB: ${completed} files • updated ${latest ? tsToLocal(latest) : "—"}`);
+    } catch {
       setKbBadgeText("KB: error");
-      // optional: console.error(e);
     }
   }
 
@@ -147,71 +130,59 @@ export default function Page();
   }
 
   function extractAnswer(data: any): string {
-    if (typeof data?.output_text === "string" && data.output_text.trim())
-      return data.output_text.trim();
+    if (typeof data?.output_text === "string" && data.output_text.trim()) return data.output_text.trim();
     if (Array.isArray(data?.output)) {
       for (const part of data.output) {
         if (part?.type === "message" && Array.isArray(part.content)) {
           const chunks = part.content
-            .filter(
-              (c: any) =>
-                c && (c.type === "output_text" || c.type === "text" || c.type === "input_text")
-            )
+            .filter((c: any) => c && (c.type === "output_text" || c.type === "text" || c.type === "input_text"))
             .map((c: any) => c.text)
             .filter(Boolean);
           if (chunks.length) return chunks.join("").trim();
         }
       }
     }
-    if (data?.choices?.[0]?.message?.content)
-      return String(data.choices[0].message.content).trim();
-    return JSON.stringify(data, null, 2);
+    if (data?.choices?.[0]?.message?.content) return String(data.choices[0].message.content).trim();
+    return "";
   }
 
- async function callOpenAI(userQuestion: string) {
-  if (!apiKey) { alert("Enter your OpenAI API key."); return; }
-  if (!VECTOR_STORE_ID) { push("System", "No KB set. Add your Vector Store ID in code."); return; }
+  async function callOpenAI(userQuestion: string) {
+    if (!apiKey) { alert("Enter your OpenAI API key."); return; }
+    if (!VECTOR_STORE_ID) { push("System", "No KB set. Add your Vector Store ID in code."); return; }
 
-  const res = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-      "OpenAI-Beta": "assistants=v2"
-    },
-    body: JSON.stringify({
-      model: "gpt-4.1",
-      temperature: 0,
-      input: userQuestion,
-      tools: [{ type: "file_search" }],
-      tool_resources: {
-        file_search: {
-          vector_store_ids: [VECTOR_STORE_ID]
-        }
+    const res = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+        "OpenAI-Beta": "assistants=v2" // keep for browser calls
       },
-      tool_choice: { type: "file_search" }
-    })
-  });
+      body: JSON.stringify({
+        model: "gpt-4.1",
+        temperature: 0,
+        input: userQuestion,
+        tools: [{ type: "file_search" }],
+        tool_resources: { file_search: { vector_store_ids: [VECTOR_STORE_ID] } },
+        tool_choice: { type: "file_search" }
+      })
+    });
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error?.message || res.statusText);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error?.message || res.statusText);
 
-  const answer =
-    (typeof data.output_text === "string" && data.output_text.trim()) ||
-    (Array.isArray(data.output) &&
-      data.output
-        .flatMap((m: any) => (Array.isArray(m?.content) ? m.content : []))
-        .map((p: any) => p?.text || p?.output_text || p?.input_text)
-        .filter(Boolean)
-        .join("")
-        .trim()) ||
-    "";
+    const answer =
+      (typeof data.output_text === "string" && data.output_text.trim()) ||
+      (Array.isArray(data.output) &&
+        data.output
+          .flatMap((m: any) => (Array.isArray(m?.content) ? m.content : []))
+          .map((p: any) => p?.text || p?.output_text || p?.input_text)
+          .filter(Boolean)
+          .join("")
+          .trim()) ||
+      "";
 
-  return answer || "Not in the archive yet.";
-}
-
- .catch(err => addMessage("GPT", Error: ${err.message}));
- 
+    return answer || "Not in the archive yet.";
+  }
 
   async function onSend() {
     const q = input.trim();
@@ -219,24 +190,20 @@ export default function Page();
     push("User", q);
     setInput("");
 
-    // local narrative controls (identical semantics to your HTML)
     const t = q.toLowerCase();
     const u = usocRef.current!;
     if (t.includes("connect")) {
-      u.connectNodes("Hero", "Sword");
-      u.updateEffects();
+      u.connectNodes("Hero", "Sword"); u.updateEffects();
       push("GPT", '"In this moment, I bring together Hero and Sword, weaving them into the tapestry of existence. Their energies now pulse together, harmonizing the system."');
       return;
     }
     if (t.includes("disconnect")) {
-      u.disconnectNodes("Hero", "Sword");
-      u.updateEffects();
+      u.disconnectNodes("Hero", "Sword"); u.updateEffects();
       push("GPT", '"The connection between Hero and Sword has been severed, allowing both to exist in their own separate potentials."');
       return;
     }
     if (t.includes("suspend")) {
-      u.naughtNodes("Hero", "Sword");
-      u.updateEffects();
+      u.naughtNodes("Hero", "Sword"); u.updateEffects();
       push("GPT", '"A pause now rests between Hero and Sword. Potential held in abeyance."');
       return;
     }
@@ -316,4 +283,5 @@ export default function Page();
       </main>
     </div>
   );
+}
 
