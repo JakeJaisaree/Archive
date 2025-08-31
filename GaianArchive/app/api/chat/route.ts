@@ -37,10 +37,10 @@ export async function POST(req: Request) {
       model: "gpt-4.1",
       temperature: 0,
       input: String(message),
-      tools: [{ type: "file_search" }] as any,
+      tools: [{ type: "file_search" }] as any,                          // soften types
       tool_resources: { file_search: { vector_store_ids: [env.VECTOR_STORE_ID] } } as any,
       tool_choice: { type: "file_search" } as any,
-    } as any);
+    } as any /* some 4.x typings lag on these fields */);
 
     const text = extractText(ai) || "Not in the archive yet.";
     return NextResponse.json({ response: text });
@@ -49,7 +49,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "AI error", detail: String(err?.message || err) }, { status: 500 });
   }
 }
-
 
 
 
