@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
     // Use Responses API with File Search; force using your Vector Store
     const body = {
-      model: "gpt-4.1",              // tools-capable model
+      model: "gpt-5",              // tools-capable model
       temperature: 0,
       input: String(message),
       tools: [{ type: "file_search" }], // declare the tool
@@ -66,5 +66,6 @@ export async function POST(req: Request) {
     );
   }
 }
+
 
 
