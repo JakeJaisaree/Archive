@@ -1,6 +1,6 @@
 "use client";
 
-import "./globals.css";
+import { useEffect, useRef, useState } from "react";
 
 type Msg = { role: "User" | "GPT" | "System"; text: string };
 
